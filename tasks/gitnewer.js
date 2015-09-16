@@ -59,24 +59,6 @@ function createTask(grunt, pattern) {
         var id = cacheConfig(originalConfig);
         var config = grunt.util._.clone(originalConfig);
 
-        /**
-         * Special handling for tasks that expect the `files` config to be a string
-         * or array of string source paths.
-         */
-        var srcFiles = true;
-        if (typeof config.files === 'string') {
-            config.src = [config.files];
-            delete config.files;
-            srcFiles = false;
-        } else if (Array.isArray(config.files) &&
-            typeof config.files[0] === 'string') {
-            config.src = config.files;
-            delete config.files;
-            srcFiles = false;
-        }
-
-        var files = grunt.task.normalizeMultiTaskFiles(config, targetName);
-
         // git newer files
         grunt.util.spawn({
             cmd: 'git',
@@ -88,7 +70,6 @@ function createTask(grunt, pattern) {
                 cmd: 'git',
                 args: ['diff', 'HEAD', '--name-only', '--diff-filter=' + options.diffFilter]
             }, function (error, result) {
-                console.log('@result', result);
                 var modifiedFiles = grunt.util._.compact(
                     result.stdout.toString().split(grunt.util.linefeed)
                 ).map(function (file) {
@@ -96,25 +77,31 @@ function createTask(grunt, pattern) {
                 });
                 grunt.verbose.writeln('Modified files:' + modifiedFiles);
 
+                var newFiles;
                 if (config.src) {
-                    config.src = filterFiles(config.src, modifiedFiles);
+                    newFiles = filterFiles(config.src, modifiedFiles);
+                    config.src = newFiles;
                 } else if (grunt.util._.isString(config.files)) {
-                    config.files = filterFiles([config.files], modifiedFiles).join(',');
+                    newFiles = filterFiles([config.files], modifiedFiles).join(',');
+                    config.files = newFiles;
                 } else if (Array.isArray(config.files) && grunt.util._.isString(config.files[0])) {
-                    config.files = filterFiles(config.files, modifiedFiles);
+                    newFiles = filterFiles(config.files, modifiedFiles);
+                    config.files = newFiles;
                 } else if (grunt.util._.isObject(config.files.src)) {
-                    config.files.src = filterFiles(config.files.src, modifiedFiles);
+                    newFiles = filterFiles(config.files.src, modifiedFiles);
+                    config.files.src = newFiles;
                 }
-                console.log('@config', config);
-                grunt.config.set([taskName, targetName], config);
+                if (newFiles.length) {
+                    grunt.config.set([taskName, targetName], config);
 
-                // run the task, and attend to postrun tasks
-                var qualified = taskName + ':' + targetName;
-                var tasks = [
-                    qualified + (args ? ':' + args : ''),
-                    'gitnewer-postrun:' + qualified + ':' + id
-                ];
-                grunt.task.run(tasks);
+                    // run the task, and attend to postrun tasks
+                    var qualified = taskName + ':' + targetName;
+                    var tasks = [
+                        qualified + (args ? ':' + args : ''),
+                        'gitnewer-postrun:' + qualified + ':' + id
+                    ];
+                    grunt.task.run(tasks);
+                }
 
                 done();
             });

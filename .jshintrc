@@ -8,7 +8,6 @@
   "quotmark": "single",
   "undef": true,
   "trailing": true,
-  "maxlen": 80,
   "globals": {
     "exports": true,
     "module": false,
