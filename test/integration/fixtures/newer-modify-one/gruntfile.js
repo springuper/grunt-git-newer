@@ -35,14 +35,14 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.loadTasks('../../../tasks');
-    grunt.loadTasks('../../../test/integration/tasks');
+    grunt.loadTasks('../../../../tasks');
+    grunt.loadTasks('../../../../test/integration/tasks');
 
     grunt.registerTask('default', function () {
         grunt.task.run([
             // run the assert task with gitnewer, expect all files
             'gitnewer:log',
-            'assert:that:modified:all',
+            'assert:that:modified:none',
 
             // HFS+ filesystem mtime resolution
             'wait:1001',
@@ -59,7 +59,7 @@ module.exports = function(grunt) {
 
             // modify nothing, expect no files
             'gitnewer:log',
-            'assert:that:modified:none'
+            'assert:that:modified:one'
         ]);
     });
 };

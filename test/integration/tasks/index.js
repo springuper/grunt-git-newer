@@ -42,6 +42,7 @@ module.exports = function (grunt) {
 
 
     grunt.registerMultiTask('log', function () {
+        console.log('@log', this.files);
         var files = filter(this.files);
         if (files.length > 0) {
             this.data.getLog().push(files);
@@ -60,9 +61,8 @@ module.exports = function (grunt) {
 
     grunt.registerMultiTask('modified', function() {
         this.filesSrc.forEach(function(filepath) {
-            var now = new Date();
-            fs.utimesSync(filepath, now, now);
-            grunt.verbose.writeln('Updating mtime for file: ' + filepath, now);
+            fs.appendFileSync(filepath, ' ', 'utf8');
+            grunt.verbose.writeln('Updating file content: ' + filepath);
         });
     });
 };
