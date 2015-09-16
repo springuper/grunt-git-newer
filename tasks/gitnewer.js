@@ -21,6 +21,19 @@ function pluckConfig(id) {
 }
 
 function createTask(grunt, pattern) {
+    function filterFiles(files, modifiedFiles) {
+        return grunt.file.expand(files).filter(function (file) {
+            var fullpath = path.resolve(file);
+            if (pattern === 'prefix') {
+                return modifiedFiles.some(function (modFile) {
+                    return modFile.indexOf(fullpath) === 0;
+                });
+            } else {
+                return modifiedFiles.indexOf(fullpath) !== -1;
+            }
+        });
+    }
+
     return function (taskName, targetName) {
         var tasks = [];
         var prefix = this.name;
@@ -67,43 +80,44 @@ function createTask(grunt, pattern) {
         // git newer files
         grunt.util.spawn({
             cmd: 'git',
-            args: ['diff', 'HEAD', '--name-only', '--diff-filter=' + options.diffFilter]
+            args: ['rev-parse', '--show-toplevel']
         }, function (error, result) {
-            var modifiedFiles = result.toString().trim().split(grunt.util.linefeed);
-            grunt.verbose.writeln('Modified files:' + modifiedFiles);
+            var base = result.stdout.toString().trim();
 
-            var newerFiles = [];
-            files.forEach(function (file) {
-                var src = file.src.filter(function (filepath) {
-                    if (pattern === 'prefix') {
-                        return modifiedFiles.some(function (modFile) {
-                            return modFile.indexOf(filepath) === 0;
-                        });
-                    } else {
-                        return modifiedFiles.indexOf(filepath) !== -1;
-                    }
+            grunt.util.spawn({
+                cmd: 'git',
+                args: ['diff', 'HEAD', '--name-only', '--diff-filter=' + options.diffFilter]
+            }, function (error, result) {
+                console.log('@result', result);
+                var modifiedFiles = grunt.util._.compact(
+                    result.stdout.toString().split(grunt.util.linefeed)
+                ).map(function (file) {
+                    return path.join(base, file);
                 });
-                grunt.verbose.writeln('Matched src:' + src);
-                if (src.length) {
-                    newerFiles.push({ src: src, dest: file.dest });
+                grunt.verbose.writeln('Modified files:' + modifiedFiles);
+
+                if (config.src) {
+                    config.src = filterFiles(config.src, modifiedFiles);
+                } else if (grunt.util._.isString(config.files)) {
+                    config.files = filterFiles([config.files], modifiedFiles).join(',');
+                } else if (Array.isArray(config.files) && grunt.util._.isString(config.files[0])) {
+                    config.files = filterFiles(config.files, modifiedFiles);
+                } else if (grunt.util._.isObject(config.files.src)) {
+                    config.files.src = filterFiles(config.files.src, modifiedFiles);
                 }
+                console.log('@config', config);
+                grunt.config.set([taskName, targetName], config);
+
+                // run the task, and attend to postrun tasks
+                var qualified = taskName + ':' + targetName;
+                var tasks = [
+                    qualified + (args ? ':' + args : ''),
+                    'gitnewer-postrun:' + qualified + ':' + id
+                ];
+                grunt.task.run(tasks);
+
+                done();
             });
-
-            // configure target with only newer files
-            config.files = newerFiles;
-            delete config.src;
-            delete config.dest;
-            grunt.config.set([taskName, targetName], config);
-
-            // run the task, and attend to postrun tasks
-            var qualified = taskName + ':' + targetName;
-            var tasks = [
-                qualified + (args ? ':' + args : ''),
-                'gitnewer-postrun:' + qualified + ':' + id
-            ];
-            grunt.task.run(tasks);
-
-            done();
         });
     };
 }

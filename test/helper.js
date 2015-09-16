@@ -10,20 +10,28 @@ var fixtures = path.join(__dirname, 'integration', 'fixtures');
 var tmpDir = 'tmp';
 
 /**
- * Spawn a Grunt process.
- * @param {string} dir Directory with gruntfile.js.
- * @param {function(Error, Process)} done Callback.
+ * Spawn a process.
+ * @param {string} cmd The command to run.
+ * @param {array} args List of string arguments.
+ * @param {object} options Config.
+ * @param {function(Error)} done Callback.
  */
-function spawnGrunt(dir, done) {
-    var gruntfile = path.join(dir, 'gruntfile.js');
-    if (!fs.existsSync(gruntfile)) {
-        done(new Error('Cannot find gruntfile.js: ' + gruntfile));
-    } else {
-        var node = process.argv[0];
-        var grunt = process.argv[1]; // assumes grunt drives these tests
-        var child = cp.spawn(node, [grunt, '--verbose', '--stack'], {cwd: dir});
-        done(null, child);
-    }
+function spawn(cmd, args, options, done) {
+    var child = cp.spawn(cmd, args, options);
+    var messages = [];
+    child.stderr.on('data', function (chunk) {
+        messages.push(chunk.toString());
+    });
+    child.stdout.on('data', function (chunk) {
+        messages.push(chunk.toString());
+    });
+    child.on('close', function (code) {
+        if (code !== 0) {
+            done(new Error('Task failed: ' + messages.join('')));
+        } else {
+            done(null);
+        }
+    });
 }
 
 /**
@@ -34,25 +42,14 @@ function spawnGrunt(dir, done) {
  */
 exports.buildFixture = function (name, done) {
     var fixture = path.join(fixtures, name);
-    spawnGrunt(fixture, function (error, child) {
-        if (error) {
-            return done(error);
-        }
-        var messages = [];
-        child.stderr.on('data', function (chunk) {
-            messages.push(chunk.toString());
-        });
-        child.stdout.on('data', function (chunk) {
-            messages.push(chunk.toString());
-        });
-        child.on('close', function (code) {
-            if (code !== 0) {
-                done(new Error('Task failed: ' + messages.join('')));
-            } else {
-                done(null);
-            }
-        });
-    });
+    var gruntfile = path.join(fixture, 'gruntfile.js');
+    if (!fs.existsSync(gruntfile)) {
+        done(new Error('Cannot find gruntfile.js: ' + gruntfile));
+    } else {
+        var node = process.argv[0];
+        var grunt = process.argv[1]; // assumes grunt drives these tests
+        spawn(node, [grunt, '--verbose', '--stack'], { cwd: fixture }, done);
+    }
 };
 
 /**
@@ -60,15 +57,9 @@ exports.buildFixture = function (name, done) {
  * @param {string} name Fixture name.
  * @param {function} done Callback.
  */
-exports.afterFixture = function(name, done) {
+exports.cleanFixture = function (name, done) {
     var fixture = path.join(fixtures, name);
-    var child = cp.spawn(node, [grunt, '--verbose', '--stack'], {cwd: dir});
-    grunt.util.spawn({
-        cmd: 'git',
-        args: ['co', fixture]
-    }, function (error, result) {
-        done(error);
-    });
+    spawn('git', ['checkout', fixture], { cwd: fixture }, done);
 };
 
 /** @type {boolean} */

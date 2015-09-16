@@ -6,6 +6,10 @@ var name = 'newer-modify-one';
 var gruntfile = path.join(name, 'gruntfile.js');
 
 describe(name, function () {
+    beforeEach(function (done) {
+        helper.cleanFixture(name, done);
+    });
+
     it('runs the default task (see ' + gruntfile + ')', function (done) {
         this.timeout(6000);
         helper.buildFixture(name, function (error, dir) {
@@ -13,7 +17,7 @@ describe(name, function () {
         });
     });
 
-    after(function (done) {
-        helper.afterFixture(name, done);
+    afterEach(function (done) {
+        helper.cleanFixture(name, done);
     });
 });
