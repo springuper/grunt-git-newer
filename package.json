@@ -1,10 +1,11 @@
 {
   "name": "grunt-gitnewer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Run Grunt tasks with only those source files modified since the last git commit.",
   "main": "gruntfile.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "grunt test",
+    "start": "grunt test watch"
   },
   "repository": {
     "type": "git",
@@ -12,10 +13,6 @@
   },
   "engines": {
     "node": ">= 0.8.0"
-  },
-  "scripts": {
-    "test": "grunt test",
-    "start": "grunt test watch"
   },
   "keywords": [
     "gruntplugin",
