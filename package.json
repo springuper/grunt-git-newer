@@ -1,0 +1,47 @@
+{
+  "name": "grunt-git-newer",
+  "version": "1.0.0",
+  "description": "Run Grunt tasks with only those source files modified since the last git commit.",
+  "main": "gruntfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/springuper/grunt-git-newer.git"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "scripts": {
+    "test": "grunt test",
+    "start": "grunt test watch"
+  },
+  "keywords": [
+    "gruntplugin",
+    "git",
+    "newer"
+  ],
+  "author": "springuper",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/springuper/grunt-git-newer/issues"
+  },
+  "homepage": "https://github.com/springuper/grunt-git-newer#readme",
+  "peerDependencies": {
+    "grunt": "~0.4.1"
+  },
+  "devDependencies": {
+    "grunt": "0.4.5",
+    "grunt-cli": "0.1.13",
+    "grunt-contrib-watch": "0.6.1",
+    "grunt-contrib-jshint": "0.10.0",
+    "chai": "1.9.2",
+    "grunt-cafe-mocha": "0.1.13",
+    "wrench": "1.5.8",
+    "tmp": "0.0.24"
+  },
+  "dependencies": {
+    "async": "^1.4.2"
+  }
+}
