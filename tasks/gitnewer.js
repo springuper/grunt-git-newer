@@ -38,7 +38,8 @@ function createTask(grunt, pattern) {
         var tasks = [];
         var prefix = this.name;
         var options = this.options({
-            diffFilter: 'ACM'
+            diffFilter: 'ACM',
+            branch: 'master'
         });
         if (!targetName) {
             if (!grunt.config(taskName)) {
@@ -68,7 +69,7 @@ function createTask(grunt, pattern) {
 
             grunt.util.spawn({
                 cmd: 'git',
-                args: ['diff', 'HEAD', '--name-only', '--diff-filter=' + options.diffFilter]
+                args: ['diff', options.branch, '--name-only', '--diff-filter=' + options.diffFilter]
             }, function (error, result) {
                 var modifiedFiles = grunt.util._.compact(
                     result.stdout.toString().split(grunt.util.linefeed)
