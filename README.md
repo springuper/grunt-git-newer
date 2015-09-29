@@ -1,4 +1,6 @@
-# grunt-git-newer
+# grunt-gitnewer
+
+[Build Status Images](https://travis-ci.org/springuper/grunt-git-newer.svg)
 
 Run Grunt tasks with only those source files modified since the last git commit.
 
@@ -12,19 +14,17 @@ The most common use case. If some files changed from last git commit, and exactl
 
 ```js
 grunt.initConfig({
-    uglify: {
+    jshint: {
         all: {
-            files: {
-                'dest/app.min.js': ['src/**/*.js']
-            }
+            src: ['src/**/*.js']
         }
     }
 });
 
-grunt.loadNpmTasks('grunt-contrib-uglify');
+grunt.loadNpmTasks('grunt-contrib-jshint');
 grunt.loadNpmTasks('grunt-gitnewer');
 
-grunt.registerTask('minify', ['gitnewer:uglify:all']);
+grunt.registerTask('lint', ['gitnewer:jshint:all']);
 ```
 
 ### The `gitnewer-prefix` task
@@ -33,12 +33,12 @@ The only differece from `gitnewer` task is `gitnewer-prefix` uses prefix match, 
 
 ### Options
 
-#### `diffFilter`='ACM'
+#### `branch`='HEAD', `diffFilter`='ACM'
 
-Internally, the following command is used to detect changed files from last git commit:
+Internally, the following command is executed to detect changed files from some git commit:
 
 ```
-git diff HEAD --name-only --diff-filter=ACM
+git diff ${branch} --name-only --diff-filter=${diffFilter}
 ```
 
-you can config the last argument as your wish.
+`branch` and `diffFilter` can be configured to meet your needs.

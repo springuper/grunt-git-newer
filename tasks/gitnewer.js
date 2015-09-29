@@ -39,7 +39,7 @@ function createTask(grunt, pattern) {
         var prefix = this.name;
         var options = this.options({
             diffFilter: 'ACM',
-            branch: 'master'
+            branch: 'HEAD'
         });
         if (!targetName) {
             if (!grunt.config(taskName)) {
