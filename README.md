@@ -1,6 +1,6 @@
 # grunt-gitnewer
 
-[Build Status Images](https://travis-ci.org/springuper/grunt-git-newer.svg)
+![Build Status Images](https://travis-ci.org/springuper/grunt-git-newer.svg)
 
 Run Grunt tasks with only those source files modified since the last git commit.
 
