@@ -1,6 +1,6 @@
 {
   "name": "grunt-gitnewer",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Run Grunt tasks with only those source files modified since the last git commit.",
   "main": "gruntfile.js",
   "scripts": {
