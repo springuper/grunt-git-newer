@@ -91,8 +91,15 @@ function createTask(grunt, pattern) {
                 } else if (grunt.util._.isObject(config.files.src)) {
                     newFiles = filterFiles(config.files.src, modifiedFiles);
                     config.files.src = newFiles;
+                } else {
+                    newFiles = filterFiles(grunt.task.normalizeMultiTaskFiles(config, targetName).map(function (file) {
+                      return file.src[0];
+                    }), modifiedFiles);
+                    config.files = {
+                      src: newFiles
+                    };
                 }
-                if (newFiles.length) {
+                if (newFiles && newFiles.length) {
                     grunt.config.set([taskName, targetName], config);
 
                     // run the task, and attend to postrun tasks
